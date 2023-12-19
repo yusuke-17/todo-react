@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import EditTodo from "./EditTodo";
 import "../App.css";
 
 type Props = {
@@ -21,18 +22,29 @@ type Props = {
   ) => void;
 };
 
-const Todo = (props: Props) => {
+const Todo: React.FC<Props> = ({ todo, todos, setTodos }) => {
+  const [isEditing, setIsEditing] = useState(false);
   const toggleTodo = () => {
-    const newTodos = props.todos.map((todo) => {
-      if (todo.id === props.todo.id) {
-        return {
-          ...todo,
-          completed: !todo.completed,
-        };
-      }
-      return todo;
-    });
-    props.setTodos(newTodos);
+    const newTodos = todos.map((t) =>
+      t.id === todo.id ? { ...t, completed: !t.completed } : t
+    );
+    setTodos(newTodos);
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleEditSave = (editedTask: string) => {
+    const newTodos = todos.map((t) =>
+      t.id === todo.id ? { ...t, task: editedTask } : t
+    );
+    setTodos(newTodos);
+    setIsEditing(false);
+  };
+
+  const handleEditCancel = () => {
+    setIsEditing(false);
   };
 
   return (
@@ -40,15 +52,26 @@ const Todo = (props: Props) => {
       <div className="todo">
         <input
           className="checkTodo"
-          id={String(props.todo.id)}
+          id={String(todo.id)}
           type="checkbox"
-          checked={props.todo.completed}
+          checked={todo.completed}
           onChange={toggleTodo}
           readOnly
         />
-        <label htmlFor={String(props.todo.id)}>
-          Todo{props.todo.id}:{props.todo.task}
-        </label>
+        {isEditing ? (
+          <EditTodo
+            initialTask={todo.task}
+            onSave={handleEditSave}
+            onCancel={handleEditCancel}
+          />
+        ) : (
+          <>
+            <label htmlFor={String(todo.id)}>
+              Todo{todo.id}:{todo.task}
+            </label>
+            <button onClick={handleEditClick}>Edit</button>
+          </>
+        )}
       </div>
     </>
   );
